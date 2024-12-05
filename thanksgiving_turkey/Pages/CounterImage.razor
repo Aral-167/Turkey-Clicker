@@ -1,0 +1,61 @@
+﻿@page "/"
+
+<div class="container">
+    <div class="image-container">
+        <img src="tunaturkey.jpg" @onclick="IncrementCounter" class="center-image" />
+        @foreach (var like in likes)
+        {
+            <div class="like" style="top: @like.Top%; left: @like.Left%;" @key="like.Id">👍</div>
+        }
+    </div>
+    <div class="counter-reset-container">
+        <p>Counter: @counter</p>
+        <button class="reset-button" @onclick="ResetCounter">Reset</button>
+    </div>
+</div>
+
+@code {
+    private int counter = 0;
+    private List<Like> likes = new List<Like>();
+    private Random random = new Random();
+
+    private void IncrementCounter()
+    {
+        counter++;
+        AddLike();
+    }
+
+    private void AddLike()
+    {
+        var like = new Like
+            {
+                Id = Guid.NewGuid(),
+                Top = random.Next(10, 90),
+                Left = random.Next(10, 90)
+            };
+        likes.Add(like);
+
+        // Remove the like after the animation duration (e.g., 1 second)
+        Task.Delay(1000).ContinueWith(_ =>
+        {
+            InvokeAsync(() =>
+            {
+                likes.Remove(like);
+                StateHasChanged();
+            });
+        });
+    }
+
+    private void ResetCounter()
+    {
+        counter = 0;
+    }
+
+    private class Like
+    {
+        public Guid Id { get; set; }
+        public int Top { get; set; }
+        public int Left { get; set; }
+    }
+}
+
